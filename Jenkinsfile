@@ -52,8 +52,6 @@ pipeline {
                                             )]) {
                         sh """
                         set -e
-                        git config user.name "$GIT_USER"
-                        git config user.email "$GIT_EMAIL"
                         git fetch origin
                         git checkout main
                         git reset --hard origin/main
