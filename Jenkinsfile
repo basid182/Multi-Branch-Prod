@@ -36,8 +36,7 @@ pipeline {
                         docker push ${IMAGE_NAME}:${IMAGE_TAG}
                         """
                     }
-                    env.IMAGE_TAG = IMAGE_TAG
-                }
+                                    }
             }
         }
 
