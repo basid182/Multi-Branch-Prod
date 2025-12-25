@@ -36,6 +36,7 @@ pipeline {
                         docker push ${IMAGE_NAME}:${IMAGE_TAG}
                         """
                     }
+                    env.IMAGE_TAG = IMAGE_TAG
                 }
             }
         }
@@ -53,13 +54,10 @@ pipeline {
                         set -e
                         git config user.name "$GIT_USER"
                         git config user.email "$GIT_EMAIL"
-
                         git fetch origin
                         git checkout main
                         git reset --hard origin/main
-
                         sed -i 's|image:.*|image: ${IMAGE_NAME}:${IMAGE_TAG}|' k8s/deployment.yml
-
                         git add k8s/deployment.yml
                         git diff --cached --quiet || git commit -m "Updated image to ${IMAGE_TAG}"
                         git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/basid182/Multi-Branch-Prod.git main
