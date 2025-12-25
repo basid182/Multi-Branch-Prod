@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     options {
-        disableConcurrentBuilds()
+        disableConcurrentBuilds() // Avoid running multiple builds at the same time
     }
 
     environment {
@@ -36,7 +36,7 @@ pipeline {
                         docker push ${IMAGE_NAME}:${IMAGE_TAG}
                         """
                     }
-                                    }
+                }
             }
         }
 
@@ -44,28 +44,39 @@ pipeline {
             when { branch 'main' }
             steps {
                 script {
-
-                    
                     withCredentials([usernamePassword(
                         credentialsId: 'github-creds',
                         usernameVariable: 'GIT_USERNAME',
-                                            )]) {
+                        passwordVariable: 'GIT_TOKEN'
+                    )]) {
                         sh """
                         set -e
                         git config user.name "$GIT_USER"
-                        git config user.mail "$GIT_EMAIL"
+                        git config user.email "$GIT_EMAIL"
                         
                         git fetch origin
                         git checkout main
                         git reset --hard origin/main
-                        sed -i "s|image:.*|image: ${IMAGE_NAME}:${IMAGE_TAG}|" k8s/deployment.yml
+                        
+                        # Replace the image tag in deployment.yml
+                        sed -i "s|image: ${IMAGE_NAME}:.*|image: ${IMAGE_NAME}:${IMAGE_TAG}|" k8s/deployment.yml
+                        
                         git add k8s/deployment.yml
                         git diff --cached --quiet || git commit -m "Updated image to ${IMAGE_TAG}"
-                        git push https://${GIT_USERNAME}@github.com/basid182/Multi-Branch-Prod.git main
+                        git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/basid182/Multi-Branch-Prod.git main
                         """
                     }
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline completed successfully. Image: ${IMAGE_NAME}:${IMAGE_TAG}"
+        }
+        failure {
+            echo "Pipeline failed. Please check the logs."
         }
     }
 }
