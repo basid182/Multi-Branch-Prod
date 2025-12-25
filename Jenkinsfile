@@ -49,8 +49,7 @@ pipeline {
                     withCredentials([usernamePassword(
                         credentialsId: 'github-creds',
                         usernameVariable: 'GIT_USERNAME',
-                        passwordVariable: 'GIT_TOKEN'
-                    )]) {
+                                            )]) {
                         sh """
                         set -e
                         git config user.name "$GIT_USER"
@@ -61,7 +60,7 @@ pipeline {
                         sed -i 's|image:.*|image: ${IMAGE_NAME}:${IMAGE_TAG}|' k8s/deployment.yml
                         git add k8s/deployment.yml
                         git diff --cached --quiet || git commit -m "Updated image to ${IMAGE_TAG}"
-                        git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/basid182/Multi-Branch-Prod.git main
+                        git push https://${GIT_USERNAME}@github.com/basid182/Multi-Branch-Prod.git main
                         """
                     }
                 }
